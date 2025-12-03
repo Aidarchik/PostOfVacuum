@@ -1,8 +1,7 @@
 WORD i=0;
 //---LOAD DATA---//
 //---Set proporties temperature--//
-T_amb = 25.0;//temperatura v komnante
-K= 0.42;//koefficient zavisit ot osnastki
+LoadAdminParametrs();
 LoadSetpointsFromFlash();
 LoadTimersFromFlash();
 

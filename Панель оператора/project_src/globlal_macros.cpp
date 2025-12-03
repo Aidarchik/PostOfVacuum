@@ -6,8 +6,9 @@ WORD valvesState=0;
 WORD oldValvesState=0;
 WORD heatersState=0;
 WORD oldHeatersState=0;
-float T_amb; //---температура окружающей среды
-float K; //---Коэфициент усиления
+float T_amb; //---temperatura v kabinete
+float K; //---Koeficient usilenia
+float alpha; //---Inercia
 
 //---For convert temperature Fixture/Heater---//
 
@@ -282,13 +283,13 @@ FixtureProcess process[countFixtures];
 TimeFormatted azotTime;
 
 
-//---корректировка температуры изделия отосительно температуры нагевателя---//
-void TemperatureHeater2Fixture(float* T_fixture, float* T_heater, float T_amb, float K){
+//---Correctirovka temperaturi izdelia otnositelno temperaturi nagrevatelia---//
+void TemperatureHeater2Fixture(float* T_fixture, float* T_heater, float T_amb, float K, float alpha){
     float T_ss = T_amb + K * (*T_heater - T_amb);
-    *T_fixture += 0.1 * (T_ss - *T_fixture);
+    *T_fixture += alpha * (T_ss - *T_fixture);
 }
 
-//---обратная функция для получения температуры нагревателя отосительно температуры изделия---//
+//---Obratnaia funktcia dlya polucheniya temperaturi nagrevatelya otnositelno temperaturi izdelia---//
 void TemperatureFixture2Heater(float* T_fixture_target, float* T_heater, float T_amb, float K){
     *T_heater = T_amb + (*T_fixture_target-T_amb)/K;
 }
@@ -323,7 +324,7 @@ void GetValuesFromDevice(){
     for(i=0; i<countFixtures; i++){
         Arr_2_DW = MAKEDWORD(ArrValueTemperature[i*2+1], ArrValueTemperature[i*2]);
         T_heater = DWord_2_Float(Arr_2_DW);
-        TemperatureHeater2Fixture(&fixture.values.temperature[i], &T_heater, 25.0, 0.42);
+        TemperatureHeater2Fixture(&fixture.values.temperature[i], &T_heater, T_amb, K, alpha);
         if((fixture.values.temperature[i] > 1000.0) || (fixture.values.temperature[i] < -1000.0)){
             fixture.temperatureOverload[i] = TRUE;
             fixture.values.temperature[i] = 0.0;
